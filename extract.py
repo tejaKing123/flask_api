@@ -7,41 +7,26 @@ from langdetect import detect
 import re   # regular expression
 import json
 from textblob import TextBlob
-# from google_auth_oauthlib.flow import InstalledAppFlow
-# import numpy as np
-# import os
-# import os
-# import scipy
-# import warnings
-# from langdetect import detect
-# from sklearn import metrics
-# from mlxtend.plotting import plot_confusion_matrix
-# import nltk
-# from nltk.corpus import stopwords
-# from nltk import word_tokenize
-# import string
-# from sklearn.model_selection import train_test_split
-# from sklearn.feature_extraction.text import CountVectorizer
-# from sklearn import metrics
-# from sklearn.metrics import f1_score
-# from sklearn.linear_model import LogisticRegression
-# from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer 
-# from mlxtend.plotting import plot_confusion_matrix
-# import matplotlib.pyplot as plt
-# from flask import Flask,render_template
+
 
 key="AIzaSyAIGeU6DMwurpAb9Ndcwyr9TB2rVzzPnbk"
 
 def can_you():
   return "hello"
 
+#* 1st step
+
+# * this method helps us to make a connection between the google apis 
+
 def build_service():
     YOUTUBE_API_SERVICE_NAME = "youtube"
     YOUTUBE_API_VERSION = "v3"
     return build(YOUTUBE_API_SERVICE_NAME,
-                 YOUTUBE_API_VERSION,
-                 developerKey=key)
+                  YOUTUBE_API_VERSION,
+                  developerKey=key)
 
+
+# * this is the video title retriving method which was took from youtube api documentation
 
 def get_vid_title(vidid):
     # VideoID = "LAUa5RDUvO4"
@@ -59,16 +44,28 @@ def get_vid_title(vidid):
 
 
 def main_method(videolink):
-  
+  #* 2nd step
+  # Then we will call this connection method to build connection
   service = build_service()
 
   # videolink="https://www.youtube.com/watch?v=TXakJYHe9uQ"
 
-  test=(videolink.find("v="))
+  #* 3rd step:
+  #  we will pass the video link to this method
+
+  # then we are retriving the video id from the youtube link
+  test=(videolink.find("v=")) 
 
   videoid=videolink[test+2:]
 
+  #  and then we are passing this link to out query_vid_title method which will help in geting our video title
+
+  # query will be our video title
+
   query = get_vid_title(videoid)
+
+  #* query result will be our video details 
+  # this search is just like google search which will get all the relevent data reagrding the video title
 
   query_results = service.search().list(part='snippet', q=query,
                                         order='relevance',
@@ -83,9 +80,11 @@ def main_method(videolink):
   video_desc = []
   video_thumb=[]
   video_pubdate=[]
+
+  # this  query_result will be in the form of json
   
   print(query_results['items'])
-  result={'thumbnail': '', 'videoTitle': '', 'MainResult': '', 'description': '','publishTime':'','publishedAt':'','channelTitle':'',}
+  # result={'thumbnail': '', 'videoTitle': '', 'MainResult': '', 'description': '','publishTime':'','publishedAt':'','channelTitle':'',}
 
   for item in query_results['items']:
       video_id.append(item['id']['videoId'])
@@ -120,12 +119,14 @@ def main_method(videolink):
   reply_count_temp = []
   like_count_temp = []
 
+
+  # The token that can be used as the value of the pageToken parameter to retrieve the next page in the result set.
   nextPage_token = None
 
   while 1:
     response = service.commentThreads().list(
                       part = 'snippet',
-                      videoId = video_id,
+                      videoId = videoid,
                       maxResults = 100, 
                       order = 'relevance', 
                       textFormat = 'plainText',
@@ -149,6 +150,7 @@ def main_method(videolink):
         video_title_pop.extend([video_title]*len(comments_temp))
         video_desc_pop.extend([video_desc]*len(comments_temp))
 
+    # this will help us to find wheather there is another page or not
     if nextPage_token is  None:
       break
 
@@ -179,6 +181,7 @@ def main_method(videolink):
   comments=unique_df
   demoji.download_codes()
 
+  #replacing emoji with empty text
   comments['clean_comments'] = comments['Comment'].apply(lambda x: demoji.replace(x,""))
 
   comments['language'] = 0
@@ -233,7 +236,7 @@ def main_method(videolink):
   data['pol_cat'][data.polarity == 0] = 0
   data['pol_cat'].value_counts()
 
-  # data.to_csv("Dataset1.csv",index = False)
+  data.to_csv("Dataset1.csv",index = False)
 
   size=len(data)
   data_nutral=data[data['pol_cat']==0]

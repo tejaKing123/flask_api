@@ -5,7 +5,7 @@ import sys
 # print(sys.path)
 
 from flask import Blueprint, jsonify, request
-from .extract import main_method
+from extract import main_method
 # from .models import Movie
 # from . import db,create_app
 # print(can_you())
@@ -27,11 +27,14 @@ def index():
 
 @main.route('/add_url', methods=['POST'])
 def add_url():
-    movie_data = request.get_json()
-    # url=movie_data['url']
-    link=movie_data['url']
+    yt_link = request.get_json()
+    # url=yt_link['url']
+    link=yt_link['url']
     test=main_method(link)
-    new_movie = Movie(url=movie_data['url'],video_title=test[4],pos_percentage=test[0],thumbnail=test[5],description=test[3],channel_name=test[6],published_date=test[7],neg_percentage=test[1],nutral_percentage=test[2])
+    print("\n".join(test[8]))
+    print("\n".join(test[9]))
+    print("\n".join(test[10]))
+    new_movie = Movie(url=yt_link['url'],video_title=test[4],pos_percentage=test[0],thumbnail=test[5],description=test[3],channel_name=test[6],published_date=test[7],neg_percentage=test[1],nutral_percentage=test[2])
 
     db.session.add(new_movie)
     db.session.commit()

@@ -11,3 +11,4 @@ class Movie(db.Model):
     thumbnail=db.Column(db.String(200))
     description=db.Column(db.String(200))
     channel_name=db.Column(db.String(50))
+    # positive_commnets=db.Column
